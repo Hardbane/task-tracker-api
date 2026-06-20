@@ -20,7 +20,6 @@ internal/repository/repository.go# SQL запросы
 internal/service/service.go      # бизнес-логика и проверки прав
 migrations/001_init.sql          # схема БД и индексы
 Dockerfile                       # сборка API
-docker-compose.yml               # API + MySQL + Redis + Prometheus
 docker-compose.prod.yml          # вариант для удаленного хоста без публикации портов MySQL/Redis
 ```
 
@@ -44,14 +43,9 @@ nano .env
 
 ### Запустить окружение
 
+
 ```bash
 docker compose up --build -d
-```
-
-Для прод-варианта на сервере можно использовать:
-
-```bash
-docker compose -f docker-compose.prod.yml up --build -d
 ```
 
 Проверить контейнеры:

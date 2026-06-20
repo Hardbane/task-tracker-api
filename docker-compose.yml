@@ -3,8 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: task_api
-    restart: unless-stopped
+    restart: always
     env_file:
       - .env
     ports:
@@ -19,15 +18,12 @@ services:
 
   mysql:
     image: mysql:8.4
-    container_name: task_mysql
-    restart: unless-stopped
+    restart: always
     environment:
       MYSQL_DATABASE: task_db
       MYSQL_USER: task_user
       MYSQL_PASSWORD: task_password
       MYSQL_ROOT_PASSWORD: root_password
-    ports:
-      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./migrations:/docker-entrypoint-initdb.d:ro
@@ -41,11 +37,8 @@ services:
 
   redis:
     image: redis:7.4-alpine
-    container_name: task_redis
-    restart: unless-stopped
+    restart: always
     command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -56,10 +49,17 @@ services:
     networks:
       - task_net
 
+  test:
+    image: golang:1.23-alpine
+    working_dir: /src
+    volumes:
+      - .:/src
+      - go_cache:/go/pkg/mod
+    command: sh -c "apk add --no-cache git && go test ./..."
+
   prometheus:
     image: prom/prometheus:v2.55.1
-    container_name: task_prometheus
-    restart: unless-stopped
+    restart: always
     ports:
       - "9090:9090"
     volumes:
@@ -70,6 +70,7 @@ services:
 volumes:
   mysql_data:
   redis_data:
+  go_cache:
 
 networks:
   task_net:
