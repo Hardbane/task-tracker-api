@@ -139,23 +139,32 @@ curl http://localhost:8080/api/v1/tasks/1/history \
 
 ## 5. Тесты
 
-Обычные unit-тесты:
+Обычные unit-тесты идут отдельным сервисом в докере:
 
 ```bash
-go test ./...
+docker compose run --rm test
 ```
 
 Покрытие:
 
 ```bash
-go test ./... -coverprofile=coverage.out
-go tool cover -func=coverage.out
+docker run --rm \
+  -v "$PWD":/src \
+  -w /src \
+  golang:1.23-alpine \
+  sh -c "apk add --no-cache git && go test ./... -coverprofile=coverage.out && go tool cover -func=coverage.out"
 ```
 
-Интеграционный тест с MySQL через testcontainers:
+Интеграционный тест с MySQL:
 
 ```bash
-RUN_INTEGRATION=1 go test ./tests/integration -v
+docker run --rm \
+  -v "$PWD":/src \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -w /src \
+  -e RUN_INTEGRATION=1 \
+  golang:1.23-alpine \
+  sh -c "apk add --no-cache git docker-cli && go test ./tests/integration -v"
 ```
 
 ## 6. Метрики
