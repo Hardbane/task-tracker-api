@@ -29,7 +29,7 @@ docker-compose.prod.yml          # вариант для удаленного х
 ### Копирование репы
 
 ```bash
-git clone <URL_ТВОЕГО_РЕПОЗИТОРИЯ> task-team-api
+git clone https://github.com/Hardbane/task-tracker-api task-team-api
 cd task-team-api
 ```
 
