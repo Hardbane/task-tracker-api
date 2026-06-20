@@ -164,4 +164,8 @@ go tool cover -func=coverage.out
 RUN_INTEGRATION=1 go test ./tests/integration -v
 ```
 
+## 6. Метрики
 
+Забрать метрики можно по эндпоинту :8080/metrics
+
+Prometheus будет доступен на порту 9090
