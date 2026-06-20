@@ -2,30 +2,8 @@
 
 REST API для управления задачами в командах: пользователи, команды, роли, задачи, история изменений, MySQL, Redis, Docker Compose, JWT, rate limit, circuit breaker, graceful shutdown и Prometheus.
 
-## 1. Что уже сделано
 
-- `POST /api/v1/register` — регистрация пользователя.
-- `POST /api/v1/login` — логин и выдача JWT.
-- `POST /api/v1/teams` — создание команды, пользователь становится `owner`.
-- `GET /api/v1/teams` — список команд пользователя.
-- `POST /api/v1/teams/{id}/invite` — приглашение пользователя в команду, только `owner/admin`.
-- `POST /api/v1/tasks` — создание задачи, только член команды.
-- `GET /api/v1/tasks?team_id=1&status=todo&assignee_id=5&page=1&limit=20` — фильтрация и пагинация.
-- `PUT /api/v1/tasks/{id}` — обновление задачи с проверкой прав.
-- `GET /api/v1/tasks/{id}/history` — история изменений.
-- `GET /api/v1/reports/team-summary` — JOIN 3+ таблиц + агрегация.
-- `GET /api/v1/reports/top-creators?month=2026-06` — оконная функция `DENSE_RANK()`.
-- `GET /api/v1/reports/invalid-assignees` — поиск задач, где assignee не состоит в команде.
-- Redis-кеш списка задач команды с TTL 5 минут.
-- Индексы в MySQL в `migrations/001_init.sql`.
-- Connection pooling для MySQL.
-- Rate limiting 100 запросов/мин на пользователя.
-- Circuit breaker на мок email-сервисе приглашений.
-- Prometheus `/metrics`.
-- Graceful shutdown.
-- Конфигурация через `config.yaml` и ENV.
-
-## 2. Структура проекта
+## 1. Структура проекта
 
 ```text
 cmd/api/main.go                  # точка входа
@@ -46,41 +24,25 @@ docker-compose.yml               # API + MySQL + Redis + Prometheus
 docker-compose.prod.yml          # вариант для удаленного хоста без публикации портов MySQL/Redis
 ```
 
-## 3. Как запустить локально или на удаленном хосте
+## 2. Быстрый старт 
 
-### Шаг 1. Установить Docker
-
-На удаленном Ubuntu-сервере:
-
-```bash
-sudo apt update
-sudo apt install -y ca-certificates curl gnupg git
-curl -fsSL https://get.docker.com | sudo sh
-sudo usermod -aG docker $USER
-newgrp docker
-```
-
-### Шаг 2. Загрузить проект на сервер
-
-Вариант через Git:
+### Копирование репы
 
 ```bash
 git clone <URL_ТВОЕГО_РЕПОЗИТОРИЯ> task-team-api
 cd task-team-api
 ```
 
-Вариант вручную: скопировать папку проекта на сервер и перейти в нее.
-
-### Шаг 3. Создать `.env`
+### Создать `.env`
 
 ```bash
 cp .env.example .env
 nano .env
 ```
 
-Обязательно замени `JWT_SECRET` на длинную случайную строку.
+Обязательно заменить `JWT_SECRET` на длинную случайную строку.
 
-### Шаг 4. Запустить окружение
+### Запустить окружение
 
 ```bash
 docker compose up --build -d
@@ -110,7 +72,7 @@ curl http://localhost:8080/health
 {"status":"ok"}
 ```
 
-## 4. Как пользоваться API
+## 3. Как пользоваться API
 
 ### Регистрация
 
@@ -128,7 +90,7 @@ curl -X POST http://localhost:8080/api/v1/login \
   -d '{"email":"mikhail@example.com","password":"password123"}'
 ```
 
-Скопируй `token` из ответа.
+Скопировать `token` из ответа.
 
 ### Создать команду
 
@@ -173,7 +135,7 @@ curl http://localhost:8080/api/v1/tasks/1/history \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-## 5. Сложные SQL-запросы
+## 4. Сложные SQL-запросы
 
 Они находятся в `internal/repository/repository.go`:
 
@@ -181,7 +143,7 @@ curl http://localhost:8080/api/v1/tasks/1/history \
 2. `TopCreatorsByTeam` — оконная функция `DENSE_RANK()` для топ-3 пользователей в каждой команде.
 3. `InvalidAssigneeTasks` — LEFT JOIN и поиск задач, где исполнитель не является участником команды.
 
-## 6. Тесты
+## 5. Тесты
 
 Обычные unit-тесты:
 
@@ -202,12 +164,4 @@ go tool cover -func=coverage.out
 RUN_INTEGRATION=1 go test ./tests/integration -v
 ```
 
-## 7. Что можно улучшить перед сдачей
-
-- Добавить endpoint комментариев к задачам, таблица уже есть.
-- Добавить мигратор вместо автозапуска SQL через `/docker-entrypoint-initdb.d`.
-- Добавить refresh-token.
-- Сделать роли еще строже: например, только `owner/admin` может менять assignee.
-- Добавить Swagger/OpenAPI.
-- Добить покрытие до 85% по `service` и `repository` методам.
 
