@@ -1,0 +1,26 @@
+app:
+  env: local
+  address: ":8080"
+  shutdown_timeout: 10s
+
+jwt:
+  secret: "change-me-in-production"
+  ttl: 24h
+
+mysql:
+  dsn: "task_user:task_password@tcp(mysql:3306)/task_db?parseTime=true&multiStatements=true&charset=utf8mb4&loc=Local"
+  max_open_conns: 25
+  max_idle_conns: 10
+  conn_max_lifetime: 5m
+
+redis:
+  addr: "redis:6379"
+  password: ""
+  db: 0
+  ttl: 5m
+
+rate_limit:
+  requests_per_minute: 100
+
+email:
+  mock_latency: 100ms

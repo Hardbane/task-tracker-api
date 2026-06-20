@@ -1,0 +1,68 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - task_net
+
+  mysql:
+    image: mysql:8.4
+    restart: always
+    environment:
+      MYSQL_DATABASE: task_db
+      MYSQL_USER: task_user
+      MYSQL_PASSWORD: task_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -proot_password --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - task_net
+
+  redis:
+    image: redis:7.4-alpine
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - task_net
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - task_net
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  task_net:
+    driver: bridge

@@ -1,0 +1,7 @@
+.git
+.gitignore
+coverage.out
+*.log
+.env
+.idea
+.vscode
